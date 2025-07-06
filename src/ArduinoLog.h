@@ -57,8 +57,41 @@ enum class ArduinoLogLevel : unsigned char {
     LogLevelVerbose = 6
 };
 
-// Backward compatibility: Legacy constants for existing code
-constexpr ArduinoLogLevel LOG_LEVEL_SILENT = ArduinoLogLevel::LogLevelSilent;
+// Undefine macros if conflicting (e.g. from NimBLE) to avoid compilation errors but these cause
+// issues if these names are used in other libraries as #defines (e.g. NimBLE). This is not 100%
+// safe as include order will matter: After including ArduinoLog.h these macros will not be
+// available unless specifically defined. This should mean that if for instance NimBLE is included
+// before ArduinoLog.h, anything that comes after ArduinoLog.h will not be able to use these macros,
+// but if ArduinoLog.h is included first, then the macros will be available.
+#ifdef LOG_LEVEL_SILENT
+#undef LOG_LEVEL_SILENT
+#endif
+#ifdef LOG_LEVEL_SILENT
+#undef LOG_LEVEL_SILENT
+#endif
+#ifdef LOG_LEVEL_FATAL
+#undef LOG_LEVEL_FATAL
+#endif
+#ifdef LOG_LEVEL_ERROR
+#undef LOG_LEVEL_ERROR
+#endif
+#ifdef LOG_LEVEL_WARNING
+#undef LOG_LEVEL_WARNING
+#endif
+#ifdef LOG_LEVEL_INFO
+#undef LOG_LEVEL_INFO
+#endif
+#ifdef LOG_LEVEL_NOTICE
+#undef LOG_LEVEL_NOTICE
+#endif
+#ifdef LOG_LEVEL_TRACE
+#undef LOG_LEVEL_TRACE
+#endif
+#ifdef LOG_LEVEL_VERBOSE
+#undef LOG_LEVEL_VERBOSE
+#endif
+
+// ArduinoLog maintains these names for backward compatibility
 constexpr ArduinoLogLevel LOG_LEVEL_FATAL = ArduinoLogLevel::LogLevelFatal;
 constexpr ArduinoLogLevel LOG_LEVEL_ERROR = ArduinoLogLevel::LogLevelError;
 constexpr ArduinoLogLevel LOG_LEVEL_WARNING = ArduinoLogLevel::LogLevelWarning;
