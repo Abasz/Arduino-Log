@@ -46,14 +46,26 @@ typedef void (*printfunction)(Print*, int);
 // ************************************************************************
 //#define DISABLE_LOGGING
 
-#define LOG_LEVEL_SILENT  0
-#define LOG_LEVEL_FATAL   1
-#define LOG_LEVEL_ERROR   2
-#define LOG_LEVEL_WARNING 3
-#define LOG_LEVEL_INFO    4
-#define LOG_LEVEL_NOTICE  4
-#define LOG_LEVEL_TRACE   5
-#define LOG_LEVEL_VERBOSE 6
+enum class ArduinoLogLevel : unsigned char {
+    LogLevelSilent = 0,
+    LogLevelFatal = 1,
+    LogLevelError = 2,
+    LogLevelWarning = 3,
+    LogLevelInfo = 4,
+    LogLevelNotice = 4, // Same as INFO, kept for backward compatibility
+    LogLevelTrace = 5,
+    LogLevelVerbose = 6
+};
+
+// Backward compatibility: Legacy constants for existing code
+constexpr ArduinoLogLevel LOG_LEVEL_SILENT = ArduinoLogLevel::LogLevelSilent;
+constexpr ArduinoLogLevel LOG_LEVEL_FATAL = ArduinoLogLevel::LogLevelFatal;
+constexpr ArduinoLogLevel LOG_LEVEL_ERROR = ArduinoLogLevel::LogLevelError;
+constexpr ArduinoLogLevel LOG_LEVEL_WARNING = ArduinoLogLevel::LogLevelWarning;
+constexpr ArduinoLogLevel LOG_LEVEL_INFO = ArduinoLogLevel::LogLevelInfo;
+constexpr ArduinoLogLevel LOG_LEVEL_NOTICE = ArduinoLogLevel::LogLevelNotice;
+constexpr ArduinoLogLevel LOG_LEVEL_TRACE = ArduinoLogLevel::LogLevelTrace;
+constexpr ArduinoLogLevel LOG_LEVEL_VERBOSE = ArduinoLogLevel::LogLevelVerbose;
 
 #define LOG_COLOR_BOLD_RED F("\033[1;31m")
 #define LOG_COLOR_BOLD_WHITE F("\033[1;37m")
@@ -120,6 +132,18 @@ public:
      * \return void
      *
      */
+    void begin(ArduinoLogLevel level, Print *output, bool showLevel = true,
+               bool showColors = false);
+
+    /**
+     * Backward compatibility: Initializing with int level
+     *
+     * \param level - logging levels <= this will be logged (as integer).
+     * \param output - place that logging output will be sent to.
+     * \param showLevel - if true, the level will be shown in the output.
+     * \param showColors - if true, the color will be shown in the output.
+     * \return void
+     */
     void begin(int level, Print *output, bool showLevel = true, bool showColors = false);
 
     /**
@@ -128,12 +152,27 @@ public:
      * \param level - The new log level.
      * \return void
      */
+    void setLevel(ArduinoLogLevel level);
+
+    /**
+     * Backward compatibility: Set the log level with int
+     *
+     * \param level - The new log level (as integer).
+     * \return void
+     */
     void setLevel(int level);
 
     /**
      * Get the log level.
      *
      * \return The current log level.
+     */
+    ArduinoLogLevel getLogLevel() const;
+
+    /**
+     * Backward compatibility: Get the log level as int
+     *
+     * \return The current log level as integer.
      */
     int getLevel() const;
 
@@ -224,13 +263,13 @@ public:
      */
     template <class T, typename... Args> void fatal(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_FATAL, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelFatal, false, msg, args...);
 #endif
     }
 
     template <class T, typename... Args> void fatalln(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_FATAL, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelFatal, true, msg, args...);
 #endif
     }
 
@@ -246,13 +285,13 @@ public:
      */
     template <class T, typename... Args> void error(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_ERROR, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelError, false, msg, args...);
 #endif
     }
   
     template <class T, typename... Args> void errorln(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_ERROR, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelError, true, msg, args...);
 #endif
     }
 
@@ -268,13 +307,13 @@ public:
      */
     template <class T, typename... Args> void warning(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_WARNING, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelWarning, false, msg, args...);
 #endif
     }
   
     template <class T, typename... Args> void warningln(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_WARNING, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelWarning, true, msg, args...);
 #endif
     }
 
@@ -290,25 +329,25 @@ public:
      */
     template <class T, typename... Args> void notice(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_NOTICE, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelNotice, false, msg, args...);
 #endif
     }
   
     template <class T, typename... Args> void noticeln(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_NOTICE, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelNotice, true, msg, args...);
 #endif
     }
 
     template <class T, typename... Args> void info(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_INFO, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelInfo, false, msg, args...);
 #endif
     }
 
     template <class T, typename... Args> void infoln(T msg, Args...args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_INFO, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelInfo, true, msg, args...);
 #endif
     }
 
@@ -324,13 +363,13 @@ public:
     */
     template <class T, typename... Args> void trace(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_TRACE, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelTrace, false, msg, args...);
 #endif
     }
 
     template <class T, typename... Args> void traceln(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_TRACE, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelTrace, true, msg, args...);
 #endif
     }
 
@@ -346,17 +385,20 @@ public:
      */
     template <class T, typename... Args> void verbose(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_VERBOSE, false, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelVerbose, false, msg, args...);
 #endif
     }
 
     template <class T, typename... Args> void verboseln(T msg, Args... args) {
 #ifndef DISABLE_LOGGING
-        printLevel(LOG_LEVEL_VERBOSE, true, msg, args...);
+        printLevel(ArduinoLogLevel::LogLevelVerbose, true, msg, args...);
 #endif
     }
 
-private:
+  private:
+    // Static helper function to constrain int values to valid enum range
+    static ArduinoLogLevel constrainLevel(int level);
+
     void print(const char *format, va_list args);
 
     void print(const __FlashStringHelper *format, va_list args);
@@ -373,13 +415,13 @@ private:
 
     void printFormat(const char format, va_list *args);
 
-    template <class T> void printLevel(int level, bool cr, T msg, ...) {
+    template <class T> void printLevel(ArduinoLogLevel level, bool cr, T msg, ...) {
 #ifndef DISABLE_LOGGING
         if (level > _level) {
             return;
         }
-        if (level < LOG_LEVEL_SILENT) {
-            level = LOG_LEVEL_SILENT;
+        if (level < ArduinoLogLevel::LogLevelSilent) {
+            level = ArduinoLogLevel::LogLevelSilent;
         }
 
 #ifdef ESP32
@@ -387,13 +429,13 @@ private:
 #endif
             if (_showColors) {
                 switch (level) {
-                case LOG_LEVEL_FATAL:
+                case ArduinoLogLevel::LogLevelFatal:
                     writeLog(LOG_COLOR_BOLD_RED);
                     break;
-                case LOG_LEVEL_ERROR:
+                case ArduinoLogLevel::LogLevelError:
                     writeLog(LOG_COLOR_RED);
                     break;
-                case LOG_LEVEL_WARNING:
+                case ArduinoLogLevel::LogLevelWarning:
                     writeLog(LOG_COLOR_YELLOW);
                     break;
                 default:
@@ -404,14 +446,14 @@ private:
             if (_prefix != NULL && _showLevel) {
                 for (int i = 0; i < _handlerCount; i++) {
                     if (_logOutputs[i]) {
-                        _prefix(_logOutputs[i], level);
+                        _prefix(_logOutputs[i], static_cast<int>(level));
                     }
                 }
             }
 
             if (_showLevel) {
                 static const char levels[] = "FEWITV";
-                writeLog(levels[level - 1]);
+                writeLog(levels[static_cast<int>(level) - 1]);
                 writeLog(": ");
             }
 
@@ -422,7 +464,7 @@ private:
             if (_suffix != NULL && _showLevel) {
                 for (int i = 0; i < _handlerCount; i++) {
                     if (_logOutputs[i]) {
-                        _suffix(_logOutputs[i], level);
+                        _suffix(_logOutputs[i], static_cast<int>(level));
                     }
                 }
             }
@@ -444,7 +486,7 @@ private:
     }
 
 #ifndef DISABLE_LOGGING
-    int _level;
+    ArduinoLogLevel _level;
     bool _showLevel;
     bool _showColors;
     Print* _logOutputs[LOG_MAX_HANDLERS];
