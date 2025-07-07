@@ -57,37 +57,39 @@ enum class ArduinoLogLevel : unsigned char {
     LogLevelVerbose = 6
 };
 
-// Undefine macros if conflicting (e.g. from NimBLE) to avoid compilation errors but these cause
-// issues if these names are used in other libraries as #defines (e.g. NimBLE). This is not 100%
-// safe as include order will matter: After including ArduinoLog.h these macros will not be
-// available unless specifically defined. This should mean that if for instance NimBLE is included
-// before ArduinoLog.h, anything that comes after ArduinoLog.h will not be able to use these macros,
-// but if ArduinoLog.h is included first, then the macros will be available.
+// Save existing macro definitions if they exist, then undefine them temporarily
+// This allows us to use our own LOG_LEVEL_* constants while preserving any
+// previously defined macros from other libraries (e.g. NimBLE)
 #ifdef LOG_LEVEL_SILENT
-#undef LOG_LEVEL_SILENT
-#endif
-#ifdef LOG_LEVEL_SILENT
+#define ARDUINOLOG_SAVED_LOG_LEVEL_SILENT LOG_LEVEL_SILENT
 #undef LOG_LEVEL_SILENT
 #endif
 #ifdef LOG_LEVEL_FATAL
+#define ARDUINOLOG_SAVED_LOG_LEVEL_FATAL LOG_LEVEL_FATAL
 #undef LOG_LEVEL_FATAL
 #endif
 #ifdef LOG_LEVEL_ERROR
+#define ARDUINOLOG_SAVED_LOG_LEVEL_ERROR LOG_LEVEL_ERROR
 #undef LOG_LEVEL_ERROR
 #endif
 #ifdef LOG_LEVEL_WARNING
+#define ARDUINOLOG_SAVED_LOG_LEVEL_WARNING LOG_LEVEL_WARNING
 #undef LOG_LEVEL_WARNING
 #endif
 #ifdef LOG_LEVEL_INFO
+#define ARDUINOLOG_SAVED_LOG_LEVEL_INFO LOG_LEVEL_INFO
 #undef LOG_LEVEL_INFO
 #endif
 #ifdef LOG_LEVEL_NOTICE
+#define ARDUINOLOG_SAVED_LOG_LEVEL_NOTICE LOG_LEVEL_NOTICE
 #undef LOG_LEVEL_NOTICE
 #endif
 #ifdef LOG_LEVEL_TRACE
+#define ARDUINOLOG_SAVED_LOG_LEVEL_TRACE LOG_LEVEL_TRACE
 #undef LOG_LEVEL_TRACE
 #endif
 #ifdef LOG_LEVEL_VERBOSE
+#define ARDUINOLOG_SAVED_LOG_LEVEL_VERBOSE LOG_LEVEL_VERBOSE
 #undef LOG_LEVEL_VERBOSE
 #endif
 
@@ -546,4 +548,39 @@ public:
 #ifndef __DO_NOT_INSTANTIATE__
 extern Logging Log;
 #endif
+
+// Restore previously defined macros if they existed
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_SILENT
+#define LOG_LEVEL_SILENT ARDUINOLOG_SAVED_LOG_LEVEL_SILENT
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_SILENT
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_FATAL
+#define LOG_LEVEL_FATAL ARDUINOLOG_SAVED_LOG_LEVEL_FATAL
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_FATAL
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_ERROR
+#define LOG_LEVEL_ERROR ARDUINOLOG_SAVED_LOG_LEVEL_ERROR
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_ERROR
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_WARNING
+#define LOG_LEVEL_WARNING ARDUINOLOG_SAVED_LOG_LEVEL_WARNING
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_WARNING
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_INFO
+#define LOG_LEVEL_INFO ARDUINOLOG_SAVED_LOG_LEVEL_INFO
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_INFO
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_NOTICE
+#define LOG_LEVEL_NOTICE ARDUINOLOG_SAVED_LOG_LEVEL_NOTICE
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_NOTICE
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_TRACE
+#define LOG_LEVEL_TRACE ARDUINOLOG_SAVED_LOG_LEVEL_TRACE
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_TRACE
+#endif
+#ifdef ARDUINOLOG_SAVED_LOG_LEVEL_VERBOSE
+#define LOG_LEVEL_VERBOSE ARDUINOLOG_SAVED_LOG_LEVEL_VERBOSE
+#undef ARDUINOLOG_SAVED_LOG_LEVEL_VERBOSE
+#endif
+
 #endif
